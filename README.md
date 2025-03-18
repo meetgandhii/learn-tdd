@@ -49,14 +49,56 @@ with a "No authors found" message when there are no authors in the database. If 
 service responds with an error code of 500. The unit test
 should be placed in `tests/authorService.test.ts`.
 
-## Part 2
+## Part 2: Limitation of `tests/authorSchema.test.ts`
 
-Briefly explain a limitation of the tests in `tests/authorSchema.test.ts` in the space below.
+The tests in `tests/authorSchema.test.ts` have the following limitations:
+
+- **Incomplete Coverage of Virtual Properties**:  
+  The tests do not validate the behavior of virtual properties:
+  - `name`: Untested scenarios like missing `first_name` or `family_name`
+  - `lifespan`: Untested edge cases (e.g., missing `date_of_birth`/`date_of_death`)
+
+- **Untested Static Methods**:  
+  Critical model methods remain untested:
+  - `getAuthorCount`
+  - `getAllAuthors`
+  - `getAuthorIdByName`
+
+- **Missing Edge Cases**:  
+  No tests for:
+  - Partial data (e.g., authors with only a first name)
+  - Field interactions (e.g., invalid date combinations)
+
+---
+
+## Part 3: Improving Tests Using Coverage Report
+
+### Process for Improvement
+
+**Step 1: We generate the Coverage Report**  
+```
+NODE_ENV=test npx jest --coverage tests/authorService.test.ts
+```
+Output includes:
+- Terminal summary (statements/branches/functions/lines coverage)
+- Detailed HTML report at `coverage/lcov-report/index.html`
+
+**Step 2: We analyze Coverage Gaps**  
+From the HTML report:
+- 🔴 **Red lines**: Untested code (e.g., error handling in `getAllAuthors`)
+- 🟡 **Yellow lines**: Partially covered branches (e.g., `lifespan` logic)
+
+**Step 3: Targeted Improvements**  
+
+| Coverage Gap                | Action                               | Example Test Case                   |
+|-----------------------------|--------------------------------------|--------------------------------------|
+| Virtual properties           | Add tests for missing date scenarios | Author with only `date_of_birth`     |
+| Static methods               | Test `getAuthorIdByName`             | Verify ID retrieval by full name    |
+| Error handling branches      | Mock database failures               | Simulate MongoDB connection errors  |
 
 
+**Summary**
 
-## Part 3
-
-Generate the coverage report for the tests you wrote. How can you improve
-your tests using the coverage report? Briefly explain your 
-process in the space below.
+- Use the HTML report’s color-coding to prioritize critical gaps
+- Focus on testing business logic before trivial getters/setters
+- Integrate coverage checks into development workflow (not just CI/CD)
